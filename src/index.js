@@ -26,6 +26,21 @@ const LaunchRequestHandler = {
   },
 }; // End LaunchRequestHandler
 
+const SessionEndedHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'SessionEndedRequest' ||
+      (request.type === 'IntentRequest' && request.intent.name === 'AMAZON.StopIntent') ||
+      (request.type === 'IntentRequest' && request.intent.name === 'AMAZON.CancelIntent');
+  },
+  handle(handlerInput) {
+    console.log('IN: SessionEndedHandler.handle');
+    return handlerInput.responseBuilder
+      .speak(getRandomGoodbye())
+      .getResponse();
+  },
+};
+
 const EntitledProductsCheck = {
   async process(handlerInput) {
     if (handlerInput.requestEnvelope.session.new === true) {
