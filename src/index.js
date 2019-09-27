@@ -1,4 +1,4 @@
-const Alexa = require('ask-sdk');
+const Alexa = require('ask-sdk-core');
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -6,6 +6,7 @@ const LaunchRequestHandler = {
   },
   handle(handlerInput) {
     console.log('IN: LaunchRequestHandler');
+    console.log(handlerInput);
 
     // got entitled products with request interceptor so now session attributes
     const sessionAttributes = handlerInput.attributesManager
@@ -59,6 +60,18 @@ const SessionEndedHandler = {
   },
 };
 
+/**
+ * Gets list of entitled products from in skill product list
+ * @param   {list} inSkillProductList in skill product list
+ * @return {list}
+ */
+function getAllEntitledProducts(inSkillProductList) {
+  const entitledProductList = inSkillProductList
+      .filter((record) => record.entitled === 'ENTITLED');
+  console.log(`entitled products: ${JSON.stringify(entitledProductList)}`);
+  return entitledProductList;
+}
+
 const EntitledProductsCheck = {
   async process(handlerInput) {
     if (handlerInput.requestEnvelope.session.new === true) {
@@ -80,7 +93,7 @@ const EntitledProductsCheck = {
   },
 };
 
-exports.handler = Alexa.SkillBuilders.standard()
+exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         SessionEndedHandler,
@@ -88,5 +101,6 @@ exports.handler = Alexa.SkillBuilders.standard()
     .addRequestInterceptors(
         EntitledProductsCheck,
     )
+    .withApiClient(new Alexa.DefaultApiClient()) // register api client
     .addErrorHandlers(ErrorHandler)
     .lambda();
